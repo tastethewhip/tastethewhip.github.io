@@ -2,4 +2,4 @@
 
 Horse racing results data
 
-Last update Wednesday 15th December 2021
+Last update 31st December 2021
