@@ -4,4 +4,4 @@ RPR / TS 72hours
 
 Horse racing results data
 
-Last update 16th APR 2022 
+Last update 25th May 2022 
