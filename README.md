@@ -8,7 +8,7 @@ RPR / TS 72hours<br>
 
 Horse racing results data<br><br>
 
-Last update 1st July 2022 <br><br>
+Last update 15th July 2022 <br><br>
 
 <a href = https://tastethewhip.github.io/2022_part_i.html>2022 January - April</a><br>
 <a href = https://tastethewhip.github.io/2022_part_ii.html>2022 May - </a><br><br>
@@ -24,5 +24,13 @@ Last update 1st July 2022 <br><br>
 <a href = https://tastethewhip.github.io/2019_part_ii.html>2019 May - July</a><br>
 <a href = https://tastethewhip.github.io/2019_part_iii.html>2019 August - October</a><br>
 <a href = https://tastethewhip.github.io/2019_part_iv.html>2019 November - December</a><br>
+<a href = https://tastethewhip.github.io/2018_part_i.html>2019 January - April</a><br>
+<a href = https://tastethewhip.github.io/2018_part_ii.html>2019 May - July</a><br>
+<a href = https://tastethewhip.github.io/2018_part_iii.html>2019 August - October</a><br>
+<a href = https://tastethewhip.github.io/2018_part_iv.html>2019 November - December</a><br>
+<a href = https://tastethewhip.github.io/2017_part_i.html>2019 January - April</a><br>
+<a href = https://tastethewhip.github.io/2017_part_ii.html>2019 May - July</a><br>
+<a href = https://tastethewhip.github.io/2017_part_iii.html>2019 August - October</a><br>
+<a href = https://tastethewhip.github.io/2017_part_iv.html>2019 November - December</a><br>
   </BODY>
 </HTML>
