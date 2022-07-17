@@ -37,7 +37,7 @@ Last update 15th July 2022 <br><br>
 <a href = https://tastethewhip.github.io/2016_part_iii.html>2016 August - October</a><br>
 <a href = https://tastethewhip.github.io/2016_part_iv.html>2016 November - December</a><br><br>
 <a href = https://tastethewhip.github.io/2015_part_i.html>2015 January - April</a><br>
-<a href = https://tastethewhip.github.io/2015_part_ii.html>2015 May - July</a><br><br>
+<a href = https://tastethewhip.github.io/2015_part_ii.html>2015 May - July</a><br>
 <a href = https://tastethewhip.github.io/2015_part_iii.html>2015 August - October</a><br>
 <a href = https://tastethewhip.github.io/2015_part_iv.html>2015 November - December</a><br><br>
 <a href = https://tastethewhip.github.io/2014_part_i.html>2014 January - April</a><br>
@@ -45,7 +45,7 @@ Last update 15th July 2022 <br><br>
 <a href = https://tastethewhip.github.io/2014_part_iii.html>2014 August - October</a><br>
 <a href = https://tastethewhip.github.io/2014_part_iv.html>2014 November - December</a><br><br>
 <a href = https://tastethewhip.github.io/2013_part_i.html>2013 January - April</a><br>
-<a href = https://tastethewhip.github.io/2013_part_ii.html>2013 May - July</a><br><br>
+<a href = https://tastethewhip.github.io/2013_part_ii.html>2013 May - July</a><br>
 <a href = https://tastethewhip.github.io/2013_part_iii.html>2013 August - October</a><br>
 <a href = https://tastethewhip.github.io/2013_part_iv.html>2013 November - December</a><br><br>
 
