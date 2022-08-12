@@ -11,7 +11,7 @@ Horse racing results data<br><br>
 Last update 7th August 2022 <br><br>
 
 <a href = https://tastethewhip.github.io/2022_part_i.html>2022 January - April</a><br>
-<a href = https://tastethewhip.github.io/2022_part_ii.html>2022 May - July</a><br><br>
+<a href = https://tastethewhip.github.io/2022_part_ii.html>2022 May - July</a><br>
 <a href = https://tastethewhip.github.io/2022_part_iii.html>2022 August - </a><br><br>
 <a href = https://tastethewhip.github.io/2021_part_i.html>2021 January - April</a><br>
 <a href = https://tastethewhip.github.io/2021_part_ii.html>2021 May - July</a><br>
