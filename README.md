@@ -8,7 +8,7 @@ RPR / TS 72hours<br>
 
 Horse racing results data<br><br>
 
-Last update 19th October 2022 <br><br>
+Last update 23rd October 2022 <br><br>
 
 <a href = https://tastethewhip.github.io/2022_part_i.html>2022 January - April</a><br>
 <a href = https://tastethewhip.github.io/2022_part_ii.html>2022 May - July</a><br>
@@ -58,7 +58,7 @@ Last update 19th October 2022 <br><br>
 <a href = https://tastethewhip.github.io/atp_matches_2022.html>2022 ATP matches</a><br>
 <a href = https://tastethewhip.github.io/wta_matches_2022.html>2022 WTA matches</a><br><br>
 
-#OLYMPICS
+#OLYMPICS<br>
 <a href = https://tastethewhip.github.io/olympics_part_i.html>Olympics 1896-1984</a><br>
 <a href = https://tastethewhip.github.io/olympics_part_ii.html>Olympics 1988-2016</a><br><br>
 
