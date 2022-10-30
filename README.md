@@ -58,5 +58,9 @@ Last update 19th October 2022 <br><br>
 <a href = https://tastethewhip.github.io/atp_matches_2022.html>2022 ATP matches</a><br>
 <a href = https://tastethewhip.github.io/wta_matches_2022.html>2022 WTA matches</a><br><br>
 
+#OLYMPICS
+<a href = https://tastethewhip.github.io/olympics_part_i.html>Olympics 1896-1984</a><br>
+<a href = https://tastethewhip.github.io/olympics_part_ii.html>Olympics 1988-2016</a><br><br>
+
   </BODY>
 </HTML>
