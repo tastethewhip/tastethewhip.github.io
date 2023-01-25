@@ -8,7 +8,7 @@ RPR / TS 72hours<br>
 
 Horse racing results data<br><br>
 
-Last update 14th January 2023 <br><br>
+Last update 22nd January 2023 <br><br>
 
 <a href = https://tastethewhip.github.io/2023_part_i.html>2023 January - </a><br><br>
 <a href = https://tastethewhip.github.io/2022_part_i.html>2022 January - April</a><br>
