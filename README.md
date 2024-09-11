@@ -4,11 +4,8 @@
  <BODY>
   # tastethewhip.github.io<br><br>
 
-RPR / TS 72hours<br>
 
-Horse racing results data<br><br>
-
-Last update 1st September 2024 <br><br>
+Horse racing results data 2009 - 2024 (present)<br><br>
 
 
 <a href = https://tastethewhip.github.io/2024_part_i.html>2024 January - April </a><br>
