@@ -1,10 +1,3 @@
-<HTML>
-  <HEAD>
-  </HEAD>
- <BODY>
-   tastethewhip.github.io<br><br>
-
-
 Horse racing results data 2009 - 2024 (present)<br><br>
 
 
@@ -67,11 +60,3 @@ Horse racing results data 2009 - 2024 (present)<br><br>
 <a href = https://tastethewhip.github.io/2010_part_ii.html>2010 August - December</a><br><br>
 <a href = https://tastethewhip.github.io/2009_part_i.html>2009 January - July</a><br>
 <a href = https://tastethewhip.github.io/2009_part_ii.html>2009 August - December</a><br><br>
-#TENNIS<br>
-<a href = https://tastethewhip.github.io/atp_matches_2022.html>2022 ATP matches</a><br>
-<a href = https://tastethewhip.github.io/wta_matches_2022.html>2022 WTA matches</a><br><br> 
-#OLYMPICS<br>
-<a href = https://tastethewhip.github.io/olympics_part_i.html>Olympics 1896-1984</a><br>
-<a href = https://tastethewhip.github.io/olympics_part_ii.html>Olympics 1988-2016</a><br><br>
-  </BODY>
-</HTML>
