@@ -1,6 +1,8 @@
+<a href = "https://tastethewhip.github.io/2025_part_i.html">2025 Jan -   </a><br><br>
 <a href = "https://tastethewhip.github.io/2024_part_i.html">2024 January - April </a><br>
 <a href = "https://tastethewhip.github.io/2024_part_ii.html">2024 May - July  </a><br>
-<a href = "https://tastethewhip.github.io/2024_part_iii.html">2024 Aug -   </a><br><br>
+<a href = "https://tastethewhip.github.io/2024_part_iii.html">2024 Aug - Oct  </a><br>
+<a href = "https://tastethewhip.github.io/2024_part_iv.html">2024 Nov - Dec  </a><br><br>
 <a href = "https://tastethewhip.github.io/2023_part_i.html">2023 January - April</a><br>
 <a href = "https://tastethewhip.github.io/2023_part_ii.html">2023 May - July</a><br>
 <a href = "https://tastethewhip.github.io/2023_part_iii.html">2023 August - October</a><br>
