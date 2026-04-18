@@ -282,7 +282,7 @@ function displayResults() {
         <div class="race-title">${race[0].course} - ${race[0].off_time}</div>
         <table>
         <tr>
-        <th>Name</th><th>Score</th><th>Rank</th><th>%</th><th>Probability</th>
+        <th>Name</th><th>Trainer</th><th>Jockey</th><th>Score</th><th>Rank</th><th>%</th><th>Probability</th>
         </tr>`;
 
         race.forEach((row,i)=>{
@@ -303,6 +303,8 @@ function displayResults() {
                 ${row.name}
                 ${hasNotes ? `<span class="toggle-notes" onclick="toggleNotes('${notesId}', this)">(Show notes)</span>` : ""}
             </td>
+            <td>${row.trainer}</td>
+            <td>${row.jockey}</td>
             <td>${row.Total}</td>
             <td>${i+1}</td>
             <td>${pct}%</td>
