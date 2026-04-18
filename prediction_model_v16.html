@@ -258,7 +258,7 @@ function processData(data) {
         let score = Math.pow(total, exp);
 
         // Store BOTH values properly
-        row.Total = Math.round(total * 1000) / 50;   // display
+        row.Total = Math.round(total * 1000) / 25;   // display
         row.Score = Math.round(score * 10) / 10;       // ranking
 
         let raceID = row.race_id;
