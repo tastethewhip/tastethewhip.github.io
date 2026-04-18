@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<title>Horse Racing Predictor</title>
+
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: #e6e6e6;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url("background.jpg") center / cover no-repeat;
+    filter: blur(10px) brightness(0.45);
+    transform: scale(1.05);
+    z-index: -1;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 20px auto;
+    background: rgba(20,20,20,0.92);
+    backdrop-filter: blur(6px);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 0 25px rgba(0,0,0,0.6);
+}
+
+h1 {
+    text-align: center;
+    color: #ffffff;
+}
+
+button {
+    padding: 10px 18px;
+    font-size: 16px;
+    margin-top: 10px;
+    cursor: pointer;
+    background: #333;
+    color: white;
+    border: 1px solid #555;
+    border-radius: 6px;
+}
+
+button:hover {
+    background: #444;
+}
+
+.race-block {
+    margin-top: 30px;
+}
+
+.race-title {
+    font-size: 20px;
+    font-weight: bold;
+    background: #2f2f2f;
+    padding: 8px;
+    border-radius: 6px;
+    color: white;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #444;
+    padding: 6px;
+    text-align: center;
+}
+
+th {
+    background: #333;
+}
+
+tr:nth-child(even) {
+    background: #1f1f1f;
+}
+
+.rank1 { background: #1e4620 !important; font-weight: bold; }
+.rank2 { background: #4a4200 !important; }
+.rank3 { background: #5a2f00 !important; }
+
+.bar-container {
+    width: 100%;
+    background: #333;
+    border-radius: 4px;
+}
+
+.bar {
+    height: 14px;
+    background: #4CAF50;
+    border-radius: 4px;
+}
+
+@media print {
+    body::before { display: none; }
+    .container { background: white; color: black; }
+    button, input { display: none; }
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Horse Racing Prediction Analysis</h1>
+
+<input type="file" id="fileInput" accept=".csv">
+<br>
+
+<!-- LOG SCALE SLIDER -->
+<label for="expSlider">
+    Odds Adjust (exp): <span id="expValue">5.00</span>
+</label>
+<br>
+
+<input type="range"
+       id="expSlider"
+       min="0"
+       max="100"
+       step="1"
+       value="50"
+       oninput="updateExpValue(this.value); runAnalysis();">
+
+<br>
+
+<button onclick="runAnalysis()">Run Analysis</button>
+<button onclick="downloadCSV()">Download CSV</button>
+
+<div id="results"></div>
+
+</div>
+
+<script>
+
+let groupedResults = {};
+
+/* LOG SCALE MAPPING */
+function sliderToExp(sliderVal) {
+    let minExp = 0.5;
+    let maxExp = 20;
+
+    let t = sliderVal / 100;
+
+    return minExp * Math.pow(maxExp / minExp, t);
+}
+
+function updateExpValue(val) {
+    let exp = sliderToExp(val);
+    document.getElementById("expValue").textContent =
+        exp.toFixed(2);
+}
+
+function parseStats(statsStr) {
+    if (!statsStr) return 0;
+
+    try {
+        let obj = JSON.parse(statsStr.replace(/'/g,'"'));
+        return Number(obj.wins || 0);
+    } catch {
+        return 0;
+    }
+}
+
+function runAnalysis() {
+
+    let file = document.getElementById("fileInput").files[0];
+    if (!file) return;
+
+    Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+            processData(results.data);
+        }
+    });
+}
+
+function processData(data) {
+
+    groupedResults = {};
+
+    data.forEach(row=>{
+
+        let courseWins = parseStats(row.stats_horse_course);
+        let goingWins = parseStats(row.stats_horse_going);
+        let distanceWins = parseStats(row.stats_horse_distance);
+
+        let ofr = Number(row.ofr)||0;
+        let rpr = Number(row.rpr)||0;
+        let ts = Number(row.ts)||0;
+        let lbs = Number(row.lbs)||0;
+        let last_run = Number(row.last_run)||0;
+
+        let trainer_rtf = Number(row.trainer_rtf)||0;
+        let trainer14 = Number(row.trainer_14_days_wins)||0;
+
+        let trainerPct =
+            Number(
+                (row.stats_trainer_ovr_wins_pct||"0")
+                .replace("%","")
+                .replace("-","0")
+            );
+
+        let stable = 30 + trainerPct + trainer_rtf + trainer14;
+
+        let form = ((rpr - lbs) + rpr);
+        form = Math.max(form,1);
+
+        let fitness = 60 - last_run;
+        fitness = Math.max(fitness,1);
+
+        let speed = (ts - ofr) + ts;
+        speed = Math.max(speed,1);
+
+        let conditions = courseWins + goingWins + distanceWins;
+
+        let total =
+            (stable + form + fitness + speed + conditions) / 100;
+
+        // LOG SCALE EXPONENT
+        let sliderVal =
+            document.getElementById("expSlider").value;
+
+        let exp = sliderToExp(sliderVal);
+
+        let score = Math.pow(total, exp);
+
+        // Store BOTH values
+        row.Total = Math.round(total * 1000) / 50;   // what you display
+        row.Score = Math.round(score * 10) / 10;       // what you rank by
+
+        let raceID = row.race_id;
+
+        if (!groupedResults[raceID])
+            groupedResults[raceID] = [];
+
+        groupedResults[raceID].push(row);
+
+    });
+
+    displayResults();
+}
+
+function displayResults() {
+
+    let output = "";
+    let racesArray = Object.values(groupedResults);
+
+    racesArray.sort((a,b)=>{
+        let courseA = a[0].course;
+        let courseB = b[0].course;
+
+        if (courseA < courseB) return -1;
+        if (courseA > courseB) return 1;
+
+        return a[0].off_time.localeCompare(b[0].off_time);
+    });
+
+    racesArray.forEach(race=>{
+
+        let sumScore = race.reduce((a,b)=>a+b.Score, 0);
+        race.sort((a,b)=>b.Score-a.Score);
+
+        let title = race[0].course + " - " + race[0].off_time;
+
+        output += `<div class="race-block">
+        <div class="race-title">${title}</div>
+        <table>
+        <tr>
+        <th>Name</th>
+        <th>Score</th>
+        <th>Rank</th>
+        <th>%</th>
+        <th>Probability</th>
+        </tr>`;
+
+        race.forEach((row,i)=>{
+
+            let rank = i+1;
+
+            let pct =
+                Math.round((row.Score/sumScore)*1000)/10;
+
+            let cls = "";
+            if (rank===1) cls="rank1";
+            if (rank===2) cls="rank2";
+            if (rank===3) cls="rank3";
+
+            output += `<tr class="${cls}">
+            <td>${row.name}</td>
+            <td>${row.Total}</td>
+            <td>${rank}</td>
+            <td>${pct}%</td>
+            <td>
+                <div class="bar-container">
+                    <div class="bar" style="width:${pct}%"></div>
+                </div>
+            </td>
+            </tr>`;
+        });
+
+        output += "</table></div>";
+    });
+
+    document.getElementById("results").innerHTML = output;
+}
+
+function downloadCSV() {
+
+    let csv = "course,off_time,name,Score,Rank,%\n";
+
+    Object.values(groupedResults).forEach(race=>{
+
+        let sumScore = race.reduce((a,b)=>a+b.Score, 0);
+
+        race.forEach((row,i)=>{
+
+            let pct =
+                Math.round((row.Score/sumScore)*1000)/10;
+
+            csv +=
+            `${row.course},${row.off_time},${row.name},${row.Score},${i+1},${pct}\n`;
+        });
+    });
+
+    let blob = new Blob([csv]);
+    let link = document.createElement("a");
+
+    link.href = URL.createObjectURL(blob);
+    link.download = "predictions.csv";
+    link.click();
+}
+
+</script>
+
+</body>
+</html>
