@@ -477,7 +477,10 @@ function processData(data) {
 
     data.forEach(row=>{
         
-               
+        /* DROP ROWS WITH NO last_run DATA */
+        if (!row.last_run || row.last_run.trim() === "") {
+            return; // Skip this row
+        }
 
         let total =
             (stable_var +
