@@ -233,7 +233,7 @@ tr:nth-child(even) {
         <!-- Stable Var -->
         <div class="control-group">
             <label for="stableVarInput">Stable Var:</label>
-            <input type="number" id="stableVarInput" value="30" min="0" step="1" 
+            <input type="number" id="stableVarInput" value="0" min="0" step="1" 
                    oninput="updateVariable('stable_var', this.value); runAnalysis();">
             <span class="control-value">Current: <span id="stableVarDisplay">30</span></span>
         </div>
@@ -241,7 +241,7 @@ tr:nth-child(even) {
         <!-- Trainer Var -->
         <div class="control-group">
             <label for="trainerVarInput">Trainer Var:</label>
-            <input type="number" id="trainerVarInput" value="1" min="0" step="0.1" 
+            <input type="number" id="trainerVarInput" value="10" min="0" step="0.1" 
                    oninput="updateVariable('trainer_var', this.value); runAnalysis();">
             <span class="control-value">Current: <span id="trainerVarDisplay">1</span></span>
         </div>
@@ -249,7 +249,7 @@ tr:nth-child(even) {
         <!-- Form Var -->
         <div class="control-group">
             <label for="formVarInput">Form Var:</label>
-            <input type="number" id="formVarInput" value="30" min="0" step="1" 
+            <input type="number" id="formVarInput" value="60" min="0" step="1" 
                    oninput="updateVariable('form_var', this.value); runAnalysis();">
             <span class="control-value">Current: <span id="formVarDisplay">30</span></span>
         </div>
@@ -257,7 +257,7 @@ tr:nth-child(even) {
         <!-- Recent Var -->
         <div class="control-group">
             <label for="recentVarInput">Recent Var:</label>
-            <input type="number" id="recentVarInput" value="60" min="0" step="1" 
+            <input type="number" id="recentVarInput" value="40" min="0" step="1" 
                    oninput="updateVariable('recent_var', this.value); runAnalysis();">
             <span class="control-value">Current: <span id="recentVarDisplay">60</span></span>
         </div>
@@ -265,7 +265,7 @@ tr:nth-child(even) {
         <!-- Speed Var -->
         <div class="control-group">
             <label for="speedVarInput">Speed Var:</label>
-            <input type="number" id="speedVarInput" value="1" min="0" step="0.1" 
+            <input type="number" id="speedVarInput" value="20" min="0" step="0.1" 
                    oninput="updateVariable('speed_var', this.value); runAnalysis();">
             <span class="control-value">Current: <span id="speedVarDisplay">1</span></span>
         </div>
@@ -273,7 +273,7 @@ tr:nth-child(even) {
         <!-- Course Var -->
         <div class="control-group">
             <label for="courseVarInput">Course Var:</label>
-            <input type="number" id="courseVarInput" value="1" min="0" step="0.1" 
+            <input type="number" id="courseVarInput" value="10" min="0" step="0.1" 
                    oninput="updateVariable('course_var', this.value); runAnalysis();">
             <span class="control-value">Current: <span id="courseVarDisplay">1</span></span>
         </div>
@@ -281,7 +281,7 @@ tr:nth-child(even) {
         <!-- Going Var -->
         <div class="control-group">
             <label for="goingVarInput">Going Var:</label>
-            <input type="number" id="goingVarInput" value="1" min="0" step="0.1" 
+            <input type="number" id="goingVarInput" value="30" min="0" step="0.1" 
                    oninput="updateVariable('going_var', this.value); runAnalysis();">
             <span class="control-value">Current: <span id="goingVarDisplay">1</span></span>
         </div>
@@ -289,7 +289,7 @@ tr:nth-child(even) {
         <!-- Distance Var -->
         <div class="control-group">
             <label for="distanceVarInput">Distance Var:</label>
-            <input type="number" id="distanceVarInput" value="1" min="0" step="0.1" 
+            <input type="number" id="distanceVarInput" value="20" min="0" step="0.1" 
                    oninput="updateVariable('distance_var', this.value); runAnalysis();">
             <span class="control-value">Current: <span id="distanceVarDisplay">1</span></span>
         </div>
@@ -314,25 +314,25 @@ tr:nth-child(even) {
 let groupedResults = {};
 
 /* Variables from line 240 */  
-let stable_var = 30;
-let trainer_var = 1;
-let form_var = 30;
-let recent_var = 60;
-let speed_var = 1;
-let course_var = 1;
-let going_var = 1;
-let distance_var = 1;
+let stable_var = 0;
+let trainer_var = 10;
+let form_var = 60;
+let recent_var = 40;
+let speed_var = 20;
+let course_var = 10;
+let going_var = 30;
+let distance_var = 20;
 
 // Default values for reset
 const DEFAULT_VALUES = {
-    stable_var: 30,
-    trainer_var: 1,
-    form_var: 30,
-    recent_var: 60,
-    speed_var: 1,
-    course_var: 1,
-    going_var: 1,
-    distance_var: 1
+    stable_var: 0,
+    trainer_var: 10,
+    form_var: 60,
+    recent_var: 40,
+    speed_var: 20,
+    course_var: 10,
+    going_var: 30,
+    distance_var: 20
 };
 
 /* Log scale */
