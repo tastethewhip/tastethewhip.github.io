@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<title>Horse Racing Predictor</title>
+
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: #e6e6e6;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url("background.jpg") center / cover no-repeat;
+    filter: blur(10px) brightness(0.45);
+    transform: scale(1.05);
+    z-index: -1;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 20px auto;
+    background: rgba(20,20,20,0.92);
+    backdrop-filter: blur(6px);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 0 25px rgba(0,0,0,0.6);
+}
+
+h1 {
+    text-align: center;
+    color: #ffffff;
+}
+
+button {
+    padding: 10px 18px;
+    font-size: 16px;
+    margin-top: 10px;
+    cursor: pointer;
+    background: #333;
+    color: white;
+    border: 1px solid #555;
+    border-radius: 6px;
+}
+
+button:hover {
+    background: #444;
+}
+
+button.reset-btn {
+    background: #663333;
+    border-color: #884444;
+}
+
+button.reset-btn:hover {
+    background: #774444;
+}
+
+.race-block {
+    margin-top: 30px;
+}
+
+.race-title {
+    font-size: 20px;
+    font-weight: bold;
+    background: #2f2f2f;
+    padding: 8px;
+    border-radius: 6px;
+    color: white;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #444;
+    padding: 6px;
+    text-align: center;
+}
+
+th {
+    background: #333;
+}
+
+tr:nth-child(even) {
+    background: #1f1f1f;
+}
+
+.rank1 { background: #1e4620 !important; font-weight: bold; }
+.rank2 { background: #4a4200 !important; }
+.rank3 { background: #5a2f00 !important; }
+
+.bar-container {
+    width: 100%;
+    background: #333;
+    border-radius: 4px;
+}
+
+.bar {
+    height: 14px;
+    background: #4CAF50;
+    border-radius: 4px;
+}
+
+/* Notes UI */
+.extra-info {
+    text-align: left;
+    font-size: 13px;
+    color: #ccc;
+    padding: 8px;
+    line-height: 1.4;
+    display: none;
+}
+
+.toggle-notes {
+    cursor: pointer;
+    color: #4CAF50;
+    text-decoration: underline;
+    font-size: 12px;
+    margin-left: 6px;
+}
+
+/* Controls Section */
+.controls-section {
+    background: #2a2a2a;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    border: 1px solid #444;
+}
+
+.controls-section h3 {
+    margin-top: 0;
+    color: #4CAF50;
+    font-size: 16px;
+}
+
+.controls-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.control-group label {
+    font-size: 13px;
+    color: #aaa;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.control-group input[type="number"] {
+    padding: 6px;
+    background: #1a1a1a;
+    border: 1px solid #555;
+    border-radius: 4px;
+    color: #e6e6e6;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.control-group input[type="range"] {
+    cursor: pointer;
+}
+
+.control-value {
+    font-size: 12px;
+    color: #4CAF50;
+}
+
+.controls-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-start;
+}
+
+@media print {
+    body::before { display: none; }
+    .container { background: white; color: black; }
+    button, input { display: none; }
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Horse Racing Prediction Analysis</h1>
+
+<input type="file" id="fileInput" accept=".csv">
+<br>
+
+<label>
+    Exponent (exp): <span id="expValue">5.00</span>
+</label>
+<br>
+
+<input type="range"
+       id="expSlider"
+       min="0"
+       max="100"
+       step="1"
+       value="50"
+       oninput="updateExpValue(this.value); runAnalysis();">
+
+<br>
+
+<!-- NEW CONTROLS SECTION -->
+<div class="controls-section">
+    <h3>⚙️ Variable Controls</h3>
+    
+    <div class="controls-grid">
+        <!-- Stable Var -->
+        <div class="control-group">
+            <label for="stableVarInput">Stable Var:</label>
+            <input type="number" id="stableVarInput" value="30" min="0" step="1" 
+                   oninput="updateVariable('stable_var', this.value); runAnalysis();">
+            <span class="control-value">Current: <span id="stableVarDisplay">30</span></span>
+        </div>
+
+        <!-- Trainer Var -->
+        <div class="control-group">
+            <label for="trainerVarInput">Trainer Var:</label>
+            <input type="number" id="trainerVarInput" value="1" min="0" step="0.1" 
+                   oninput="updateVariable('trainer_var', this.value); runAnalysis();">
+            <span class="control-value">Current: <span id="trainerVarDisplay">1</span></span>
+        </div>
+
+        <!-- Form Var -->
+        <div class="control-group">
+            <label for="formVarInput">Form Var:</label>
+            <input type="number" id="formVarInput" value="30" min="0" step="1" 
+                   oninput="updateVariable('form_var', this.value); runAnalysis();">
+            <span class="control-value">Current: <span id="formVarDisplay">30</span></span>
+        </div>
+
+        <!-- Recent Var -->
+        <div class="control-group">
+            <label for="recentVarInput">Recent Var:</label>
+            <input type="number" id="recentVarInput" value="60" min="0" step="1" 
+                   oninput="updateVariable('recent_var', this.value); runAnalysis();">
+            <span class="control-value">Current: <span id="recentVarDisplay">60</span></span>
+        </div>
+
+        <!-- Speed Var -->
+        <div class="control-group">
+            <label for="speedVarInput">Speed Var:</label>
+            <input type="number" id="speedVarInput" value="1" min="0" step="0.1" 
+                   oninput="updateVariable('speed_var', this.value); runAnalysis();">
+            <span class="control-value">Current: <span id="speedVarDisplay">1</span></span>
+        </div>
+
+        <!-- Course Var -->
+        <div class="control-group">
+            <label for="courseVarInput">Course Var:</label>
+            <input type="number" id="courseVarInput" value="1" min="0" step="0.1" 
+                   oninput="updateVariable('course_var', this.value); runAnalysis();">
+            <span class="control-value">Current: <span id="courseVarDisplay">1</span></span>
+        </div>
+
+        <!-- Going Var -->
+        <div class="control-group">
+            <label for="goingVarInput">Going Var:</label>
+            <input type="number" id="goingVarInput" value="1" min="0" step="0.1" 
+                   oninput="updateVariable('going_var', this.value); runAnalysis();">
+            <span class="control-value">Current: <span id="goingVarDisplay">1</span></span>
+        </div>
+
+        <!-- Distance Var -->
+        <div class="control-group">
+            <label for="distanceVarInput">Distance Var:</label>
+            <input type="number" id="distanceVarInput" value="1" min="0" step="0.1" 
+                   oninput="updateVariable('distance_var', this.value); runAnalysis();">
+            <span class="control-value">Current: <span id="distanceVarDisplay">1</span></span>
+        </div>
+    </div>
+
+    <div class="controls-buttons">
+        <button class="reset-btn" onclick="resetToDefaults()">Reset to Defaults</button>
+    </div>
+</div>
+
+<button onclick="runAnalysis()">Run Analysis</button>
+<button onclick="downloadCSV()">Download CSV</button>
+<button onclick="expandAllNotes()">Expand All Notes</button>
+<button onclick="collapseAllNotes()">Collapse All Notes</button>
+
+<div id="results"></div>
+
+</div>
+
+<script>
+
+let groupedResults = {};
+
+/* Variables from line 240 */  
+let stable_var = 30;
+let trainer_var = 1;
+let form_var = 30;
+let recent_var = 60;
+let speed_var = 1;
+let course_var = 1;
+let going_var = 1;
+let distance_var = 1;
+
+// Default values for reset
+const DEFAULT_VALUES = {
+    stable_var: 30,
+    trainer_var: 1,
+    form_var: 30,
+    recent_var: 60,
+    speed_var: 1,
+    course_var: 1,
+    going_var: 1,
+    distance_var: 1
+};
+
+/* Log scale */
+function sliderToExp(val) {
+    let minExp = 0.5;
+    let maxExp = 20;
+    let t = val / 100;
+    return minExp * Math.pow(maxExp / minExp, t);
+}
+
+function updateExpValue(val) {
+    document.getElementById("expValue").textContent =
+        sliderToExp(val).toFixed(2);
+}
+
+/* Update variable from control input */
+function updateVariable(varName, value) {
+    const numValue = parseFloat(value);
+    
+    switch(varName) {
+        case 'stable_var':
+            stable_var = numValue;
+            document.getElementById("stableVarDisplay").textContent = numValue;
+            break;
+        case 'trainer_var':
+            trainer_var = numValue;
+            document.getElementById("trainerVarDisplay").textContent = numValue;
+            break;
+        case 'form_var':
+            form_var = numValue;
+            document.getElementById("formVarDisplay").textContent = numValue;
+            break;
+        case 'recent_var':
+            recent_var = numValue;
+            document.getElementById("recentVarDisplay").textContent = numValue;
+            break;
+        case 'speed_var':
+            speed_var = numValue;
+            document.getElementById("speedVarDisplay").textContent = numValue;
+            break;
+        case 'course_var':
+            course_var = numValue;
+            document.getElementById("courseVarDisplay").textContent = numValue;
+            break;
+        case 'going_var':
+            going_var = numValue;
+            document.getElementById("goingVarDisplay").textContent = numValue;
+            break;
+        case 'distance_var':
+            distance_var = numValue;
+            document.getElementById("distanceVarDisplay").textContent = numValue;
+            break;
+    }
+}
+
+/* Reset all variables to defaults */
+function resetToDefaults() {
+    stable_var = DEFAULT_VALUES.stable_var;
+    trainer_var = DEFAULT_VALUES.trainer_var;
+    form_var = DEFAULT_VALUES.form_var;
+    recent_var = DEFAULT_VALUES.recent_var;
+    speed_var = DEFAULT_VALUES.speed_var;
+    course_var = DEFAULT_VALUES.course_var;
+    going_var = DEFAULT_VALUES.going_var;
+    distance_var = DEFAULT_VALUES.distance_var;
+
+    // Update all input fields and displays
+    document.getElementById("stableVarInput").value = stable_var;
+    document.getElementById("trainerVarInput").value = trainer_var;
+    document.getElementById("formVarInput").value = form_var;
+    document.getElementById("recentVarInput").value = recent_var;
+    document.getElementById("speedVarInput").value = speed_var;
+    document.getElementById("courseVarInput").value = course_var;
+    document.getElementById("goingVarInput").value = going_var;
+    document.getElementById("distanceVarInput").value = distance_var;
+
+    document.getElementById("stableVarDisplay").textContent = stable_var;
+    document.getElementById("trainerVarDisplay").textContent = trainer_var;
+    document.getElementById("formVarDisplay").textContent = form_var;
+    document.getElementById("recentVarDisplay").textContent = recent_var;
+    document.getElementById("speedVarDisplay").textContent = speed_var;
+    document.getElementById("courseVarDisplay").textContent = course_var;
+    document.getElementById("goingVarDisplay").textContent = going_var;
+    document.getElementById("distanceVarDisplay").textContent = distance_var;
+
+    runAnalysis();
+}
+
+/* Toggle notes */
+function toggleNotes(id, el) {
+    let row = document.getElementById(id);
+
+    if (row.style.display === "none") {
+        row.style.display = "table-row";
+        if (el) el.textContent = "(Hide notes)";
+    } else {
+        row.style.display = "none";
+        if (el) el.textContent = "(Show notes)";
+    }
+}
+
+function expandAllNotes() {
+    document.querySelectorAll(".extra-info").forEach(r => {
+        r.style.display = "table-row";
+    });
+    document.querySelectorAll(".toggle-notes").forEach(el => {
+        el.textContent = "(Hide notes)";
+    });
+}
+
+function collapseAllNotes() {
+    document.querySelectorAll(".extra-info").forEach(r => {
+        r.style.display = "none";
+    });
+    document.querySelectorAll(".toggle-notes").forEach(el => {
+        el.textContent = "(Show notes)";
+    });
+}
+
+function parseStats(str) {
+    if (!str) return 0;
+    try {
+        let obj = JSON.parse(str.replace(/'/g,'"'));
+        return Number(obj.wins || 0);
+    } catch { return 0; }
+}
+
+function runAnalysis() {
+    let file = document.getElementById("fileInput").files[0];
+    if (!file) return;
+
+    Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: res => processData(res.data)
+    });
+}
+
+function processData(data) {
+    
+    groupedResults = {};
+
+    data.forEach(row=>{
+        
+               
+
+        let total =
+            (stable_var +
+            Number(((row.stats_trainer_ovr_wins_pct||"0").replace("%","").replace("-","0")) * trainer_var) +
+            Number(row.trainer_rtf||0) +
+            Number(row.trainer_14_days_wins||0) +
+
+            Math.max((((Number(row.rpr||0) - Number(row.lbs||0)) + Number(row.rpr||0)),1) * form_var) +
+            Math.max(recent_var / Number(row.last_run||0),1) +
+            Math.max(((Number(row.ts||0) - Number(row.ofr||0)) + Number(row.ts||0),1) * speed_var) +
+
+            (parseStats(row.stats_horse_course) * course_var) +
+            (parseStats(row.stats_horse_going) * going_var) +
+            (parseStats(row.stats_horse_distance) * distance_var)
+            ) / 100;
+
+        let exp = sliderToExp(document.getElementById("expSlider").value);
+
+        let score = Math.pow(total, exp);
+
+        // Store BOTH values properly
+        row.Total = Math.round(total * 1000) / 25;   // display
+        row.Score = Math.round(score * 10) / 10;       // ranking
+
+        
+        let raceID = row.race_id;
+        if (!groupedResults[raceID]) groupedResults[raceID] = [];
+        groupedResults[raceID].push(row);
+    });
+
+    displayResults();
+}
+
+function displayResults() {
+
+    let output = "";
+
+    Object.values(groupedResults).forEach(race=>{
+
+        let sumScore = race.reduce((a,b)=>a+b.Score,0);
+        race.sort((a,b)=>b.Score-a.Score);
+
+        output += `<div class="race-block">
+        <div class="race-title">${race[0].course} - ${race[0].off_time}- ${race[0].race_name}- ${race[0].distance_round}</div>
+        <table>
+        <tr>
+        <th>Name</th><th>Trainer</th><th>Jockey</th><th>Score</th><th>Rank</th><th>%</th><th>Probability</th>
+        </tr>`;
+
+        race.forEach((row,i)=>{
+
+            let pct = Math.round((row.Score/sumScore)*1000)/10;
+            let notesId = `notes_${race[0].race_id}_${i}`;
+
+            let extra = [];
+
+            if (row.comment?.trim()) extra.push(`<b>Comment:</b> ${row.comment}`);
+            if (row.spotlight?.trim()) extra.push(`<b>Spotlight:</b> ${row.spotlight}`);
+            if (row.quotes?.trim()) extra.push(`<b>Quotes:</b> ${row.quotes}`);
+
+            let hasNotes = extra.length > 0;
+
+            output += `<tr>
+            <td>
+                ${row.name}
+                ${hasNotes ? `<span class="toggle-notes" onclick="toggleNotes('${notesId}', this)">(Show notes)</span>` : ""}
+            </td>
+            <td>${row.trainer}</td>
+            <td>${row.jockey}</td>
+            <td>${row.Total}</td>
+            <td>${i+1}</td>
+            <td>${pct}%</td>
+            
+            <td>
+                <div class="bar-container">
+                    <div class="bar" style="width:${pct}%"></div>
+                </div>
+            </td>
+            </tr>`;
+
+            if (hasNotes) {
+                output += `<tr id="${notesId}" class="extra-info">
+                    <td colspan="5">${extra.join("<br>")}</td>
+                </tr>`;
+            }
+        });
+
+        output += "</table></div>";
+    });
+
+    document.getElementById("results").innerHTML = output;
+}
+
+function downloadCSV() {
+    let csv = "course,off_time,name,Score,Rank,%\n";
+
+    Object.values(groupedResults).forEach(race=>{
+        let sumScore = race.reduce((a,b)=>a+b.Score,0);
+
+        race.forEach((row,i)=>{
+            let pct = Math.round((row.Score/sumScore)*1000)/10;
+            csv += `${row.course},${row.off_time},${row.name},${row.Total},${i+1},${pct}\n`;
+        });
+    });
+
+    let blob = new Blob([csv]);
+    let link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "predictions.csv";
+    link.click();
+}
+
+</script>
+
+</body>
+</html>
