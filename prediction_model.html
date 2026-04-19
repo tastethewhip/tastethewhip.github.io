@@ -331,9 +331,58 @@ const DEFAULT_VALUES = {
     recent_var: 40,
     speed_var: 20,
     course_var: 10,
-    going_var: 30,
+    going_var: 3,
     distance_var: 20
 };
+
+// Odds/Price lookup table
+const ODDS_TABLE = [
+    { maxPct: 1.96078431372549, price: "50/1" },
+    { maxPct: 2.94117647058824, price: "33/1" },
+    { maxPct: 3.84615384615385, price: "25/1" },
+    { maxPct: 4.76190476190476, price: "20/1" },
+    { maxPct: 5.88235294117647, price: "16/1" },
+    { maxPct: 7.69230769230769, price: "12/1" },
+    { maxPct: 8.33333333333333, price: "11/1" },
+    { maxPct: 9.09090909090909, price: "10/1" },
+    { maxPct: 10, price: "9/1" },
+    { maxPct: 10.5263157894737, price: "17/2" },
+    { maxPct: 11.1111111111111, price: "8/1" },
+    { maxPct: 11.7647058823529, price: "15/2" },
+    { maxPct: 12.5, price: "7/1" },
+    { maxPct: 13.3333333333333, price: "13/2" },
+    { maxPct: 14.2857142857143, price: "6/1" },
+    { maxPct: 15.3846153846154, price: "11/2" },
+    { maxPct: 16.6666666666667, price: "5/1" },
+    { maxPct: 18.1818181818182, price: "9/2" },
+    { maxPct: 20, price: "4/1" },
+    { maxPct: 22.2222222222222, price: "7/2" },
+    { maxPct: 23.0769230769231, price: "10/3" },
+    { maxPct: 25, price: "3/1" },
+    { maxPct: 26.6666666666667, price: "11/4" },
+    { maxPct: 28.5714285714286, price: "5/2" },
+    { maxPct: 30.7692307692308, price: "9/4" },
+    { maxPct: 33.3333333333333, price: "2/1" },
+    { maxPct: 34.7826086956522, price: "15/8" },
+    { maxPct: 36.3636363636364, price: "7/4" },
+    { maxPct: 38.0952380952381, price: "13/8" },
+    { maxPct: 40, price: "6/4" },
+    { maxPct: 42.1052631578947, price: "11/8" },
+    { maxPct: 44.4444444444444, price: "5/4" },
+    { maxPct: 47.6190476190476, price: "11/10" },
+    { maxPct: 48.7804878048781, price: "21/20" },
+    { maxPct: 50, price: "1/1" }
+];
+
+/* Function to get price based on percentage */
+function getPriceFromPercentage(pct) {
+    for (let entry of ODDS_TABLE) {
+        if (pct <= entry.maxPct) {
+            return entry.price;
+        }
+    }
+    return "4/5"; // Default if above 50%
+}
 
 /* Log scale */
 function sliderToExp(val) {
@@ -527,12 +576,13 @@ function displayResults() {
         <div class="race-title">${race[0].course} - ${race[0].off_time}- ${race[0].race_name}- ${race[0].distance_round}</div>
         <table>
         <tr>
-        <th>Name</th><th>Trainer</th><th>Jockey</th><th>Score</th><th>Rank</th><th>%</th><th>Probability</th>
+        <th>Name</th><th>Trainer</th><th>Jockey</th><th>Score</th><th>Rank</th><th>%</th><th>Price</th><th>Probability</th>
         </tr>`;
 
         race.forEach((row,i)=>{
 
             let pct = Math.round((row.Score/sumScore)*1000)/10;
+            let price = getPriceFromPercentage(pct);
             let notesId = `notes_${race[0].race_id}_${i}`;
 
             let extra = [];
@@ -553,6 +603,7 @@ function displayResults() {
             <td>${row.Total}</td>
             <td>${i+1}</td>
             <td>${pct}%</td>
+            <td><strong>${price}</strong></td>
             
             <td>
                 <div class="bar-container">
@@ -563,7 +614,7 @@ function displayResults() {
 
             if (hasNotes) {
                 output += `<tr id="${notesId}" class="extra-info">
-                    <td colspan="5">${extra.join("<br>")}</td>
+                    <td colspan="8">${extra.join("<br>")}</td>
                 </tr>`;
             }
         });
@@ -575,14 +626,15 @@ function displayResults() {
 }
 
 function downloadCSV() {
-    let csv = "course,off_time,name,Score,Rank,%\n";
+    let csv = "course,off_time,name,Score,Rank,%,Price\n";
 
     Object.values(groupedResults).forEach(race=>{
         let sumScore = race.reduce((a,b)=>a+b.Score,0);
 
         race.forEach((row,i)=>{
             let pct = Math.round((row.Score/sumScore)*1000)/10;
-            csv += `${row.course},${row.off_time},${row.name},${row.Total},${i+1},${pct}\n`;
+            let price = getPriceFromPercentage(pct);
+            csv += `${row.course},${row.off_time},${row.name},${row.Total},${i+1},${pct},${price}\n`;
         });
     });
 
