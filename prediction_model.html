@@ -534,8 +534,8 @@ function processData(data) {
         let total =
             (stable_var +
             Number(((row.stats_trainer_ovr_wins_pct||"0").replace("%","").replace("-","0")) * trainer_var) +
-            Number(row.trainer_rtf||0) +
-            Number(row.trainer_14_days_wins||0) +
+            Number((row.trainer_rtf||0) * Number(row.trainer_14_days_wins||0)) +
+            
 
             Math.max((((Number(row.rpr||0) - Number(row.ofr||0)) + Number(row.rpr||0)),1) * form_var) +
             Math.max(recent_var / Number(row.last_run||0),1) +
