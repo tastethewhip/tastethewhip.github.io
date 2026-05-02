@@ -64,9 +64,9 @@
 <a href = "https://tastethewhip.github.io/2009_part_i.html">2009 January - July</a><br>
 <a href = "https://tastethewhip.github.io/2009_part_ii.html">2009 August - December</a><br><br>
 <a href = "https://tastethewhip.github.io/2003_part_i.html">2003 January - April</a><br>
-<a href = "https://tastethewhip.github.io/2003_part_ii.html">2003 May - July (pending)</a><br>
+<a href = "https://tastethewhip.github.io/2003_part_ii.html">2003 May - July</a><br>
 <a href = "https://tastethewhip.github.io/2003_part_iii.html">2003 August - October (pending)</a><br>
-<a href = "https://tastethewhip.github.io/2003_part_iv.html">2003 November - December</a><br><br>
+<a href = "https://tastethewhip.github.io/2003_part_iv.html">2003 November - December (pending)</a><br><br>
 <a href = "https://tastethewhip.github.io/2002_part_i.html">2002 January - April</a><br>
 <a href = "https://tastethewhip.github.io/2002_part_ii.html">2002 May - July</a><br>
 <a href = "https://tastethewhip.github.io/2002_part_iii.html">2002 August - October</a><br>
