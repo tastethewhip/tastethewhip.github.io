@@ -524,7 +524,7 @@ function processData(data) {
     
     groupedResults = {};
 
-    data.forEach(row=>{
+    data.forEach(row => {
         
         /* DROP ROWS WITH NO last_run DATA */
         if (!row.last_run || row.last_run.trim() === "") {
@@ -567,10 +567,10 @@ function displayResults() {
 
     let output = "";
 
-    Object.values(groupedResults).forEach(race=>{
+    Object.values(groupedResults).forEach(race => {
 
-        let sumScore = race.reduce((a,b)=>a+b.Score,0);
-        race.sort((a,b)=>b.Score-a.Score);
+        let sumScore = race.reduce((a,b) => a + b.Score, 0);
+        race.sort((a,b) => b.Score - a.Score);
 
         output += `<div class="race-block">
         <div class="race-title">${race[0].course} - ${race[0].off_time}- ${race[0].race_name}- ${race[0].distance_round}</div>
@@ -579,7 +579,7 @@ function displayResults() {
         <th>Name</th><th>Trainer</th><th>Jockey</th><th>Score</th><th>Rank</th><th>%</th><th>Price</th><th>Probability</th>
         </tr>`;
 
-        race.forEach((row,i)=>{
+        race.forEach((row, i) => {
 
             let pct = Math.round((row.Score/sumScore)*1000)/10;
             let price = getPriceFromPercentage(pct);
@@ -626,15 +626,21 @@ function displayResults() {
 }
 
 function downloadCSV() {
-    let csv = "course,off_time,name,Score,Rank,%,Price\n";
+    let csv = "course,off_time,name,Score,Rank,%,Price,Comment,Spotlight,Quotes\n";
 
-    Object.values(groupedResults).forEach(race=>{
-        let sumScore = race.reduce((a,b)=>a+b.Score,0);
+    Object.values(groupedResults).forEach(race => {
+        let sumScore = race.reduce((a,b) => a + b.Score, 0);
 
-        race.forEach((row,i)=>{
+        race.forEach((row, i) => {
             let pct = Math.round((row.Score/sumScore)*1000)/10;
             let price = getPriceFromPercentage(pct);
-            csv += `${row.course},${row.off_time},${row.name},${row.Total},${i+1},${pct},${price}\n`;
+            
+            // Escape CSV values to handle commas and quotes
+            let escapedComment = (row.comment || "").replace(/"/g, '""');
+            let escapedSpotlight = (row.spotlight || "").replace(/"/g, '""');
+            let escapedQuotes = (row.quotes || "").replace(/"/g, '""');
+            
+            csv += `${row.course},${row.off_time},${row.name},${row.Total},${i+1},${pct},${price},"${escapedComment}","${escapedSpotlight}","${escapedQuotes}"\n`;
         });
     });
 
