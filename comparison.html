@@ -27,7 +27,7 @@
             background: rgba(255, 255, 255, 0.95);
             border-radius: 12px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 1200px;
+            max-width: 1400px;
             width: 100%;
             padding: 40px;
             backdrop-filter: blur(10px);
@@ -205,11 +205,47 @@
             background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
         }
 
+        .table-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .rows-per-page {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .rows-per-page select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.95em;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.95em;
+        }
+
         .table-wrapper {
             overflow-x: auto;
             background: white;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
         }
 
         table {
@@ -224,6 +260,12 @@
             padding: 12px;
             text-align: left;
             font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        th:hover {
+            background: #555;
         }
 
         td {
@@ -233,6 +275,44 @@
 
         tr:hover {
             background: #f5f5f5;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .pagination button {
+            padding: 8px 12px;
+            font-size: 0.9em;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            min-width: 40px;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: #0b7dda;
+        }
+
+        .pagination button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .pagination button.active {
+            background: #333;
+        }
+
+        .pagination-info {
+            font-size: 0.9em;
+            color: #666;
         }
 
         .loading {
@@ -280,6 +360,14 @@
             button {
                 width: 100%;
             }
+
+            .table-controls {
+                flex-direction: column;
+            }
+
+            .search-box {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -320,6 +408,22 @@
 
         <div class="results-section" id="resultsSection">
             <div class="stats" id="stats"></div>
+            
+            <div class="table-controls">
+                <div class="rows-per-page">
+                    <label for="rowsPerPage">Rows per page:</label>
+                    <select id="rowsPerPage">
+                        <option value="10">10</option>
+                        <option value="25" selected>25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="🔍 Search horse name..." />
+                </div>
+            </div>
+
             <div class="table-wrapper">
                 <table id="resultsTable">
                     <thead>
@@ -335,6 +439,8 @@
                     <tbody id="resultsBody"></tbody>
                 </table>
             </div>
+
+            <div class="pagination" id="pagination"></div>
         </div>
     </div>
 
@@ -342,6 +448,9 @@
         let df1 = null;
         let df2 = null;
         let processedData = null;
+        let currentPage = 1;
+        let rowsPerPage = 25;
+        let filteredData = null;
 
         // Helper functions
         function extractBaseName(name) {
@@ -502,6 +611,13 @@
                     }
                 });
 
+                // Sort by horse name alphabetically
+                df1.sort((a, b) => {
+                    const nameA = (a.name || a.Name || '').toUpperCase();
+                    const nameB = (b.name || b.Name || '').toUpperCase();
+                    return nameA.localeCompare(nameB);
+                });
+
                 displayResults(matchedCount, prefixes);
                 showLoading(false);
             } catch (error) {
@@ -512,6 +628,8 @@
 
         function displayResults(matchedCount, prefixes) {
             processedData = df1;
+            filteredData = [...df1];
+            currentPage = 1;
 
             // Show stats
             const statsHtml = `
@@ -535,10 +653,19 @@
             `;
 
             document.getElementById('stats').innerHTML = statsHtml;
+            renderTable();
+            document.getElementById('resultsSection').classList.add('show');
+            document.getElementById('downloadBtn').style.display = 'inline-block';
+            showStatus(`Successfully matched ${matchedCount} horses!`, 'success');
+        }
 
-            // Show table
+        function renderTable() {
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const pageData = filteredData.slice(start, end);
+
             const tableBody = document.getElementById('resultsBody');
-            tableBody.innerHTML = df1.slice(0, 50).map(row => `
+            tableBody.innerHTML = pageData.map(row => `
                 <tr>
                     <td>${row.name || row.Name || ''}</td>
                     <td>${row.S_diff !== null && row.S_diff !== undefined ? row.S_diff : '-'}</td>
@@ -549,9 +676,77 @@
                 </tr>
             `).join('');
 
-            document.getElementById('resultsSection').classList.add('show');
-            document.getElementById('downloadBtn').style.display = 'inline-block';
-            showStatus(`Successfully matched ${matchedCount} horses!`, 'success');
+            renderPagination();
+        }
+
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+            const paginationEl = document.getElementById('pagination');
+            
+            let html = `<button onclick="previousPage()" ${currentPage === 1 ? 'disabled' : ''}>← Previous</button>`;
+
+            // Show page numbers
+            const maxPagesToShow = 5;
+            const startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+            const endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+            if (startPage > 1) {
+                html += `<button onclick="goToPage(1)">1</button>`;
+                if (startPage > 2) html += `<span>...</span>`;
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                html += `<button onclick="goToPage(${i})" ${i === currentPage ? 'class="active"' : ''}>${i}</button>`;
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) html += `<span>...</span>`;
+                html += `<button onclick="goToPage(${totalPages})">${totalPages}</button>`;
+            }
+
+            html += `<button onclick="nextPage()" ${currentPage === totalPages ? 'disabled' : ''}>Next →</button>`;
+            html += `<div class="pagination-info">Page ${currentPage} of ${totalPages} (${filteredData.length} total)</div>`;
+
+            paginationEl.innerHTML = html;
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            renderTable();
+            document.querySelector('.table-wrapper').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function nextPage() {
+            const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+            if (currentPage < totalPages) {
+                goToPage(currentPage + 1);
+            }
+        }
+
+        function previousPage() {
+            if (currentPage > 1) {
+                goToPage(currentPage - 1);
+            }
+        }
+
+        function filterTable(searchTerm) {
+            if (!processedData) return;
+
+            const term = searchTerm.toLowerCase();
+            filteredData = processedData.filter(row => {
+                const horseName = (row.name || row.Name || '').toLowerCase();
+                return horseName.includes(term);
+            });
+
+            // Keep alphabetical order in filtered results
+            filteredData.sort((a, b) => {
+                const nameA = (a.name || a.Name || '').toUpperCase();
+                const nameB = (b.name || b.Name || '').toUpperCase();
+                return nameA.localeCompare(nameB);
+            });
+
+            currentPage = 1;
+            renderTable();
         }
 
         function downloadResults() {
@@ -579,10 +774,13 @@
             df1 = null;
             df2 = null;
             processedData = null;
+            filteredData = null;
+            currentPage = 1;
             document.getElementById('file1').value = '';
             document.getElementById('file2').value = '';
             document.getElementById('name1').textContent = 'racecard_data.csv';
             document.getElementById('name2').textContent = 'performance-figures.csv';
+            document.getElementById('searchInput').value = '';
             document.getElementById('resultsSection').classList.remove('show');
             document.getElementById('downloadBtn').style.display = 'none';
             hideStatus();
@@ -596,6 +794,16 @@
             document.getElementById('processBtn').addEventListener('click', processFiles);
             document.getElementById('downloadBtn').addEventListener('click', downloadResults);
             document.getElementById('resetBtn').addEventListener('click', reset);
+            
+            document.getElementById('rowsPerPage').addEventListener('change', (e) => {
+                rowsPerPage = parseInt(e.target.value);
+                currentPage = 1;
+                renderTable();
+            });
+
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                filterTable(e.target.value);
+            });
         });
     </script>
 </body>
