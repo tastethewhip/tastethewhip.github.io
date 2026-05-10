@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Race Card Comparison Tool</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+                        url('background.jpg') center/cover no-repeat fixed;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 1200px;
+            width: 100%;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2.5em;
+        }
+
+        .upload-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+        }
+
+        .file-input-label {
+            display: block;
+            background: #4CAF50;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: bold;
+            transition: background 0.3s;
+            border: 2px dashed transparent;
+        }
+
+        .file-input-label:hover {
+            background: #45a049;
+        }
+
+        .file-input-label.dragover {
+            background: #2e7d32;
+            border-color: white;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-name {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #666;
+            font-weight: normal;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 1em;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        #processBtn {
+            background: #2196F3;
+            color: white;
+        }
+
+        #processBtn:hover:not(:disabled) {
+            background: #0b7dda;
+            transform: translateY(-2px);
+        }
+
+        #processBtn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        #downloadBtn {
+            background: #ff9800;
+            color: white;
+            display: none;
+        }
+
+        #downloadBtn:hover {
+            background: #e68900;
+            transform: translateY(-2px);
+        }
+
+        #resetBtn {
+            background: #f44336;
+            color: white;
+        }
+
+        #resetBtn:hover {
+            background: #da190b;
+            transform: translateY(-2px);
+        }
+
+        .status {
+            background: #f0f0f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #2196F3;
+            display: none;
+        }
+
+        .status.show {
+            display: block;
+        }
+
+        .status.success {
+            background: #e8f5e9;
+            border-left-color: #4CAF50;
+        }
+
+        .status.error {
+            background: #ffebee;
+            border-left-color: #f44336;
+        }
+
+        .status.info {
+            background: #e3f2fd;
+            border-left-color: #2196F3;
+        }
+
+        .results-section {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .results-section.show {
+            display: block;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .number {
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+
+        .stat-card.matched {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+
+        th {
+            background: #333;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:hover {
+            background: #f5f5f5;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2196F3;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .upload-section {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏇 Race Card Comparison Tool</h1>
+
+        <div class="upload-section">
+            <div class="file-input-wrapper">
+                <label for="file1" class="file-input-label" id="label1">
+                    📋 Upload Race Card Data
+                    <div class="file-name" id="name1">racecard_data.csv</div>
+                </label>
+                <input type="file" id="file1" accept=".csv" />
+            </div>
+
+            <div class="file-input-wrapper">
+                <label for="file2" class="file-input-label" id="label2">
+                    📊 Upload Performance Figures
+                    <div class="file-name" id="name2">performance-figures.csv</div>
+                </label>
+                <input type="file" id="file2" accept=".csv" />
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button id="processBtn" disabled>⚙️ Process Files</button>
+            <button id="downloadBtn">⬇️ Download Results</button>
+            <button id="resetBtn">🔄 Reset</button>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Processing your data...</p>
+        </div>
+
+        <div class="status" id="status"></div>
+
+        <div class="results-section" id="resultsSection">
+            <div class="stats" id="stats"></div>
+            <div class="table-wrapper">
+                <table id="resultsTable">
+                    <thead>
+                        <tr>
+                            <th>Horse Name</th>
+                            <th>S_diff</th>
+                            <th>H_diff</th>
+                            <th>A_diff</th>
+                            <th>T_diff</th>
+                            <th>M_diff</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let df1 = null;
+        let df2 = null;
+        let processedData = null;
+
+        // Helper functions
+        function extractBaseName(name) {
+            return name.replace(/\s*\([A-Z]{2,3}\)\s*$/, '').trim();
+        }
+
+        function showStatus(message, type = 'info') {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = `status show ${type}`;
+        }
+
+        function hideStatus() {
+            const statusEl = document.getElementById('status');
+            statusEl.className = 'status';
+        }
+
+        function showLoading(show = true) {
+            document.getElementById('loading').classList.toggle('show', show);
+        }
+
+        // File handling
+        function setupFileInput(fileInputId, labelId, nameId) {
+            const fileInput = document.getElementById(fileInputId);
+            const label = document.getElementById(labelId);
+            const nameEl = document.getElementById(nameId);
+
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    nameEl.textContent = e.target.files[0].name;
+                    checkFilesReady();
+                }
+            });
+
+            // Drag and drop
+            label.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                label.classList.add('dragover');
+            });
+
+            label.addEventListener('dragleave', () => {
+                label.classList.remove('dragover');
+            });
+
+            label.addEventListener('drop', (e) => {
+                e.preventDefault();
+                label.classList.remove('dragover');
+                fileInput.files = e.dataTransfer.files;
+                if (e.dataTransfer.files.length > 0) {
+                    nameEl.textContent = e.dataTransfer.files[0].name;
+                    checkFilesReady();
+                }
+            });
+        }
+
+        function checkFilesReady() {
+            const file1 = document.getElementById('file1').files.length > 0;
+            const file2 = document.getElementById('file2').files.length > 0;
+            document.getElementById('processBtn').disabled = !(file1 && file2);
+        }
+
+        // CSV Processing
+        function processFiles() {
+            const file1 = document.getElementById('file1').files[0];
+            const file2 = document.getElementById('file2').files[0];
+
+            if (!file1 || !file2) {
+                showStatus('Please select both files', 'error');
+                return;
+            }
+
+            showLoading(true);
+            hideStatus();
+
+            let filesProcessed = 0;
+
+            Papa.parse(file1, {
+                header: true,
+                complete: (results) => {
+                    df1 = results.data.filter(row => Object.values(row).some(v => v));
+                    filesProcessed++;
+                    if (filesProcessed === 2) {
+                        runComparison();
+                    }
+                },
+                error: (error) => {
+                    showStatus(`Error reading file 1: ${error.message}`, 'error');
+                    showLoading(false);
+                }
+            });
+
+            Papa.parse(file2, {
+                header: true,
+                complete: (results) => {
+                    df2 = results.data.filter(row => Object.values(row).some(v => v));
+                    filesProcessed++;
+                    if (filesProcessed === 2) {
+                        runComparison();
+                    }
+                },
+                error: (error) => {
+                    showStatus(`Error reading file 2: ${error.message}`, 'error');
+                    showLoading(false);
+                }
+            });
+        }
+
+        function runComparison() {
+            try {
+                // Create lookup dictionary from df2
+                const lookupDict = {};
+                df2.forEach(row => {
+                    const baseName = extractBaseName(row.Racehorse || '').toUpperCase();
+                    if (baseName) {
+                        lookupDict[baseName] = row;
+                    }
+                });
+
+                showStatus(`Created lookup with ${Object.keys(lookupDict).length} entries`, 'info');
+
+                // Process each horse
+                let matchedCount = 0;
+                const prefixes = ['S', 'H', 'A', 'T', 'M'];
+
+                df1.forEach(row => {
+                    prefixes.forEach(prefix => {
+                        row[`${prefix}_diff`] = null;
+                    });
+
+                    const horseName = row.name || row.Name || '';
+                    const baseName = extractBaseName(horseName).toUpperCase();
+
+                    if (baseName in lookupDict) {
+                        matchedCount++;
+                        const perfRow = lookupDict[baseName];
+
+                        // Get performance columns (assuming they're at indices 4-9)
+                        const keys = Object.keys(perfRow);
+                        const performanceKeys = keys.slice(4, 10);
+
+                        prefixes.forEach(prefix => {
+                            let latestValue = null;
+                            performanceKeys.forEach((key, i) => {
+                                const perfVal = perfRow[key];
+                                if (perfVal && perfVal !== '-') {
+                                    const match = String(perfVal).match(/([SHATM]):(\d+)/);
+                                    if (match && match[1] === prefix) {
+                                        const value = parseInt(match[2]);
+                                        if (i === 0) {
+                                            latestValue = value;
+                                        } else if (latestValue !== null) {
+                                            row[`${prefix}_diff`] = value - latestValue;
+                                        }
+                                    }
+                                }
+                            });
+                        });
+                    }
+                });
+
+                displayResults(matchedCount, prefixes);
+                showLoading(false);
+            } catch (error) {
+                showStatus(`Processing error: ${error.message}`, 'error');
+                showLoading(false);
+            }
+        }
+
+        function displayResults(matchedCount, prefixes) {
+            processedData = df1;
+
+            // Show stats
+            const statsHtml = `
+                <div class="stat-card">
+                    <h3>Total Horses</h3>
+                    <div class="number">${df1.length}</div>
+                </div>
+                <div class="stat-card matched">
+                    <h3>Matched</h3>
+                    <div class="number">${matchedCount}</div>
+                </div>
+                ${prefixes.map(prefix => {
+                    const count = df1.filter(row => row[`${prefix}_diff`] !== null && row[`${prefix}_diff`] !== undefined).length;
+                    return `
+                        <div class="stat-card">
+                            <h3>${prefix}_diff Entries</h3>
+                            <div class="number">${count}</div>
+                        </div>
+                    `;
+                }).join('')}
+            `;
+
+            document.getElementById('stats').innerHTML = statsHtml;
+
+            // Show table
+            const tableBody = document.getElementById('resultsBody');
+            tableBody.innerHTML = df1.slice(0, 50).map(row => `
+                <tr>
+                    <td>${row.name || row.Name || ''}</td>
+                    <td>${row.S_diff !== null && row.S_diff !== undefined ? row.S_diff : '-'}</td>
+                    <td>${row.H_diff !== null && row.H_diff !== undefined ? row.H_diff : '-'}</td>
+                    <td>${row.A_diff !== null && row.A_diff !== undefined ? row.A_diff : '-'}</td>
+                    <td>${row.T_diff !== null && row.T_diff !== undefined ? row.T_diff : '-'}</td>
+                    <td>${row.M_diff !== null && row.M_diff !== undefined ? row.M_diff : '-'}</td>
+                </tr>
+            `).join('');
+
+            document.getElementById('resultsSection').classList.add('show');
+            document.getElementById('downloadBtn').style.display = 'inline-block';
+            showStatus(`Successfully matched ${matchedCount} horses!`, 'success');
+        }
+
+        function downloadResults() {
+            if (!processedData) return;
+
+            const csv = [
+                Object.keys(processedData[0]).join(','),
+                ...processedData.map(row =>
+                    Object.values(row).map(v => 
+                        typeof v === 'string' && v.includes(',') ? `"${v}"` : v
+                    ).join(',')
+                )
+            ].join('\n');
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'data_updated.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        function reset() {
+            df1 = null;
+            df2 = null;
+            processedData = null;
+            document.getElementById('file1').value = '';
+            document.getElementById('file2').value = '';
+            document.getElementById('name1').textContent = 'racecard_data.csv';
+            document.getElementById('name2').textContent = 'performance-figures.csv';
+            document.getElementById('resultsSection').classList.remove('show');
+            document.getElementById('downloadBtn').style.display = 'none';
+            hideStatus();
+            document.getElementById('processBtn').disabled = true;
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            setupFileInput('file1', 'label1', 'name1');
+            setupFileInput('file2', 'label2', 'name2');
+            document.getElementById('processBtn').addEventListener('click', processFiles);
+            document.getElementById('downloadBtn').addEventListener('click', downloadResults);
+            document.getElementById('resetBtn').addEventListener('click', reset);
+        });
+    </script>
+</body>
+</html>
