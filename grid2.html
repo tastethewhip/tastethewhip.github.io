@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>At The Races Odds Grid Viewer</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #111827;
+        color: #f9fafb;
+        margin: 0;
+        padding: 20px;
+    }
+
+    h1 {
+        margin-top: 0;
+        font-size: 28px;
+    }
+
+    .controls {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    input[type="text"] {
+        flex: 1;
+        min-width: 300px;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #374151;
+        background: #1f2937;
+        color: white;
+        font-size: 14px;
+    }
+
+    button {
+        padding: 10px 16px;
+        border: none;
+        border-radius: 8px;
+        background: #2563eb;
+        color: white;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    button:hover {
+        background: #1d4ed8;
+    }
+
+    iframe {
+        width: 100%;
+        height: 700px;
+        border: 2px solid #374151;
+        border-radius: 10px;
+        background: white;
+    }
+
+    .note {
+        margin-top: 15px;
+        color: #9ca3af;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    code {
+        background: #1f2937;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+</style>
+</head>
+<body>
+
+<h1>At The Races Odds Grid Viewer</h1>
+
+<div class="controls">
+    <input
+        id="urlInput"
+        type="text"
+        value="https://www.attheraces.com/racecard/Newbury/16-May-2026/1435"
+    >
+    <button onclick="loadOddsGrid()">Load Odds Grid</button>
+</div>
+
+<iframe id="outputFrame"></iframe>
+
+<div class="note">
+    This page fetches the racecard HTML, extracts the element with
+    <code>id="odds-grid"</code>, and displays it inside the iframe.<br><br>
+    <strong>Important:</strong> This only works if the target website allows
+    cross-origin requests (CORS). If At The Races blocks access, use a CORS
+    proxy or server-side fetch.
+</div>
+
+<script>
+async function loadOddsGrid() {
+    const url = document.getElementById('urlInput').value.trim();
+    const iframe = document.getElementById('outputFrame');
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+
+    iframeDoc.open();
+    iframeDoc.write('<p style="font-family:Arial;padding:20px;">Loading...</p>');
+    iframeDoc.close();
+
+    try {
+        // Use a public CORS proxy
+        const proxy = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
+
+        const response = await fetch(proxy);
+        if (!response.ok) {
+            throw new Error('HTTP ' + response.status);
+        }
+
+        const html = await response.text();
+
+        // Parse returned HTML
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+
+        // Find odds-grid
+        const oddsGrid = doc.querySelector('#odds-grid');
+
+        if (!oddsGrid) {
+            throw new Error('No element with id="odds-grid" found.');
+        }
+
+        // Grab stylesheets from source page
+        const styles = Array.from(doc.querySelectorAll('link[rel="stylesheet"], style'))
+            .map(el => el.outerHTML)
+            .join('\n');
+
+        // Write into iframe
+        iframeDoc.open();
+        iframeDoc.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                ${styles}
+                <style>
+                    body {
+                        margin: 20px;
+                        font-family: Arial, sans-serif;
+                        background: white;
+                    }
+                </style>
+            </head>
+            <body>
+                ${oddsGrid.outerHTML}
+            </body>
+            </html>
+        `);
+        iframeDoc.close();
+
+    } catch (err) {
+        iframeDoc.open();
+        iframeDoc.write(`
+            <div style="font-family:Arial;padding:20px;color:red;">
+                <h2>Error</h2>
+                <p>${err.message}</p>
+                <p>
+                    At The Races may block cross-origin access.
+                    If so, run this code from your own server.
+                </p>
+            </div>
+        `);
+        iframeDoc.close();
+    }
+}
+
+// Auto-load on page startup
+loadOddsGrid();
+</script>
+
+</body>
+</html>
