@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<title>Horse Racing Predictor</title>
+
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: #e6e6e6;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url("background.jpg") center / cover no-repeat;
+    filter: blur(10px) brightness(0.45);
+    transform: scale(1.05);
+    z-index: -1;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 20px auto;
+    background: rgba(20,20,20,0.92);
+    backdrop-filter: blur(6px);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 0 25px rgba(0,0,0,0.6);
+}
+
+h1 {
+    text-align: center;
+    color: #ffffff;
+}
+
+button {
+    padding: 10px 18px;
+    font-size: 16px;
+    margin-top: 10px;
+    cursor: pointer;
+    background: #333;
+    color: white;
+    border: 1px solid #555;
+    border-radius: 6px;
+}
+
+button:hover {
+    background: #444;
+}
+
+button.reset-btn {
+    background: #663333;
+    border-color: #884444;
+}
+
+button.reset-btn:hover {
+    background: #774444;
+}
+
+.race-block {
+    margin-top: 30px;
+}
+
+.race-title {
+    font-size: 20px;
+    font-weight: bold;
+    background: #2f2f2f;
+    padding: 8px;
+    border-radius: 6px;
+    color: white;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #444;
+    padding: 6px;
+    text-align: center;
+}
+
+th {
+    background: #333;
+}
+
+tr:nth-child(even) {
+    background: #1f1f1f;
+}
+
+.rank1 { background: #1e4620 !important; font-weight: bold; }
+.rank2 { background: #4a4200 !important; }
+.rank3 { background: #5a2f00 !important; }
+
+.bar-container {
+    width: 100%;
+    background: #333;
+    border-radius: 4px;
+}
+
+.bar {
+    height: 14px;
+    background: #4CAF50;
+    border-radius: 4px;
+}
+
+/* Notes UI */
+.extra-info {
+    text-align: left;
+    font-size: 13px;
+    color: #ccc;
+    padding: 8px;
+    line-height: 1.4;
+    display: none;
+}
+
+.toggle-notes {
+    cursor: pointer;
+    color: #4CAF50;
+    text-decoration: underline;
+    font-size: 12px;
+    margin-left: 6px;
+}
+
+/* Controls Section */
+.controls-section {
+    background: #2a2a2a;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    border: 1px solid #444;
+}
+
+.controls-section h3 {
+    margin-top: 0;
+    color: #4CAF50;
+    font-size: 16px;
+}
+
+.controls-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.control-group label {
+    font-size: 13px;
+    color: #aaa;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.control-group input[type="number"] {
+    padding: 6px;
+    background: #1a1a1a;
+    border: 1px solid #555;
+    border-radius: 4px;
+    color: #e6e6e6;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.control-group input[type="range"] {
+    cursor: pointer;
+}
+
+.control-value {
+    font-size: 12px;
+    color: #4CAF50;
+}
+
+.controls-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-start;
+}
+
+@media print {
+    body::before { display: none; }
+    .container { background: white; color: black; }
+    button, input { display: none; }
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Horse Racing Prediction Analysis</h1>
+
+<input type="file" id="fileInput" accept=".csv">
+<br>
+
+<label>
+    Exponent (exp): <span id="expValue">5.00</span>
+</label>
+<br>
+
+<input type="range"
+       id="expSlider"
+       min="0"
+       max="100"
+       step="1"
+       value="50"
+       oninput="updateExpValue(this.value); runAnalysis();">
+
+<br>
+
+<!-- NEW CONTROLS SECTION -->
+<div class="controls-section">
+    <h3>⚙️ Variable Controls</h3>
+    
+    <div class="controls-grid">
+        <!-- Stable Var -->
+        <div class="control-group">
+            <label for="stableVarInput">Stable Var:</label>
+            <input type="number" id="stableVarInput" value="0" min="0" step="1" 
+                   oninput="updateVariable('stable_var', this.value); runAnalysis();">
+            <span class="control-value">Current: <span id="stableVarDisplay">0</span></span>
+        </div>
+
+        <!-- Trainer Var -->
+        <div class="control-group">
+            <label for="trainerVarInput">Trainer Var:</label>
+            <input type="number" id="trainerVarInput" value="10" min="0" step="0.1" 
+                   oninput="updateVariable('trainer_var', this.value); runAnalysis();">
+            <span class="control-value">Current: <span id="trainerVarDisplay">10</span></span>
+        </div>
+
+        <!-- Form Var -->
+        <div class="control-group">
+            <label for="formVarInput">Form Var:</label>
+            <input type="number" id="formVarInput" value="60" min="0" step="1" 
+                   oninput="updateVariable('form_var', this.value); runAnalysis();">
+            <span class="control-value">Current: <span id="formVarDisplay">60</span></span>
+        </div>
+
+        <!-- Recent Var -->
+        <div class="control-group">
+            <label for="recentVarInput">Recent Var:</label>
+            <input type="number" id="recentVarInput" value="40" min="0" step="1" 
+                   oninput="updateVariable('recent_var', this.value); runAnalysis();">
+            <span class="control-value">Current: <span id="recentVarDisplay">40</span></span>
+        </div>
+
+        <!-- Speed Var -->
+        <div class="control-group">
+            <label for="speedVarInput">Speed Var:</label>
+            <input type="number" id="speedVarInput" value="20" min="0" step="0.1" 
+                   oninput="updateVariable('speed_var', this.value); runAnalysis();">
+            <span class="control-value">Current: <span id="speedVarDisplay">20</span></span>
+        </div>
+
+        <!-- Course Var -->
+        <div class="control-group">
+            <label for="courseVarInput">Course Var:</label>
+            <input type="number" id="courseVarInput" value="10" min="0" step="0.1" 
+                   oninput="updateVariable('course_var', this.value); runAnalysis();">
+            <span class="control-value">Current: <span id="courseVarDisplay">10</span></span>
+        </div>
+
+        <!-- Going Var -->
+        <div class="control-group">
+            <label for="goingVarInput">Going Var:</label>
+            <input type="number" id="goingVarInput" value="30" min="0" step="0.1" 
+                   oninput="updateVariable('going_var', this.value); runAnalysis();">
+            <span class="control-value">Current: <span id="goingVarDisplay">30</span></span>
+        </div>
+
+        <!-- Distance Var -->
+        <div class="control-group">
+            <label for="distanceVarInput">Distance Var:</label>
+            <input type="number" id="distanceVarInput" value="20" min="0" step="0.1" 
+                   oninput="updateVariable('distance_var', this.value); runAnalysis();">
+            <span class="control-value">Current: <span id="distanceVarDisplay">20</span></span>
+        </div>
+    </div>
+
+    <div class="controls-buttons">
+        <button class="reset-btn" onclick="resetToDefaults()">Reset to Defaults</button>
+    </div>
+</div>
+
+<button onclick="runAnalysis()">Run Analysis</button>
+<button onclick="downloadCSV()">Download CSV</button>
+<button onclick="expandAllNotes()">Expand All Notes</button>
+<button onclick="collapseAllNotes()">Collapse All Notes</button>
+
+<div id="results"></div>
+
+</div>
+
+<script>
+
+let groupedResults = {};
+let rawData = [];
+
+/* Variables from line 240 */  
+let stable_var = 0;
+let trainer_var = 10;
+let form_var = 60;
+let recent_var = 40;
+let speed_var = 20;
+let course_var = 10;
+let going_var = 30;
+let distance_var = 20;
+
+// Default values for reset
+const DEFAULT_VALUES = {
+    stable_var: 0,
+    trainer_var: 10,
+    form_var: 60,
+    recent_var: 40,
+    speed_var: 20,
+    course_var: 10,
+    going_var: 30,
+    distance_var: 20
+};
+
+// Odds/Price lookup table
+const ODDS_TABLE = [
+    { maxPct: 1.96078431372549, price: "50/1" },
+    { maxPct: 2.94117647058824, price: "33/1" },
+    { maxPct: 3.84615384615385, price: "25/1" },
+    { maxPct: 4.76190476190476, price: "20/1" },
+    { maxPct: 5.88235294117647, price: "16/1" },
+    { maxPct: 7.69230769230769, price: "12/1" },
+    { maxPct: 8.33333333333333, price: "11/1" },
+    { maxPct: 9.09090909090909, price: "10/1" },
+    { maxPct: 10, price: "9/1" },
+    { maxPct: 10.5263157894737, price: "17/2" },
+    { maxPct: 11.1111111111111, price: "8/1" },
+    { maxPct: 11.7647058823529, price: "15/2" },
+    { maxPct: 12.5, price: "7/1" },
+    { maxPct: 13.3333333333333, price: "13/2" },
+    { maxPct: 14.2857142857143, price: "6/1" },
+    { maxPct: 15.3846153846154, price: "11/2" },
+    { maxPct: 16.6666666666667, price: "5/1" },
+    { maxPct: 18.1818181818182, price: "9/2" },
+    { maxPct: 20, price: "4/1" },
+    { maxPct: 22.2222222222222, price: "7/2" },
+    { maxPct: 23.0769230769231, price: "10/3" },
+    { maxPct: 25, price: "3/1" },
+    { maxPct: 26.6666666666667, price: "11/4" },
+    { maxPct: 28.5714285714286, price: "5/2" },
+    { maxPct: 30.7692307692308, price: "9/4" },
+    { maxPct: 33.3333333333333, price: "2/1" },
+    { maxPct: 34.7826086956522, price: "15/8" },
+    { maxPct: 36.3636363636364, price: "7/4" },
+    { maxPct: 38.0952380952381, price: "13/8" },
+    { maxPct: 40, price: "6/4" },
+    { maxPct: 42.1052631578947, price: "11/8" },
+    { maxPct: 44.4444444444444, price: "5/4" },
+    { maxPct: 47.6190476190476, price: "11/10" },
+    { maxPct: 48.7804878048781, price: "21/20" },
+    { maxPct: 50, price: "1/1" }
+];
+
+/* Function to get price based on percentage */
+function getPriceFromPercentage(pct) {
+    for (let entry of ODDS_TABLE) {
+        if (pct <= entry.maxPct) {
+            return entry.price;
+        }
+    }
+    return "4/5"; // Default if above 50%
+}
+
+/* Log scale */
+function sliderToExp(val) {
+    let minExp = 0.5;
+    let maxExp = 20;
+    let t = val / 100;
+    return minExp * Math.pow(maxExp / minExp, t);
+}
+
+function updateExpValue(val) {
+    document.getElementById("expValue").textContent =
+        sliderToExp(val).toFixed(2);
+}
+
+/* Update variable from control input */
+function updateVariable(varName, value) {
+    const numValue = parseFloat(value);
+    
+    switch(varName) {
+        case 'stable_var':
+            stable_var = numValue;
+            document.getElementById("stableVarDisplay").textContent = numValue;
+            break;
+        case 'trainer_var':
+            trainer_var = numValue;
+            document.getElementById("trainerVarDisplay").textContent = numValue;
+            break;
+        case 'form_var':
+            form_var = numValue;
+            document.getElementById("formVarDisplay").textContent = numValue;
+            break;
+        case 'recent_var':
+            recent_var = numValue;
+            document.getElementById("recentVarDisplay").textContent = numValue;
+            break;
+        case 'speed_var':
+            speed_var = numValue;
+            document.getElementById("speedVarDisplay").textContent = numValue;
+            break;
+        case 'course_var':
+            course_var = numValue;
+            document.getElementById("courseVarDisplay").textContent = numValue;
+            break;
+        case 'going_var':
+            going_var = numValue;
+            document.getElementById("goingVarDisplay").textContent = numValue;
+            break;
+        case 'distance_var':
+            distance_var = numValue;
+            document.getElementById("distanceVarDisplay").textContent = numValue;
+            break;
+    }
+}
+
+/* Reset all variables to defaults */
+function resetToDefaults() {
+    stable_var = DEFAULT_VALUES.stable_var;
+    trainer_var = DEFAULT_VALUES.trainer_var;
+    form_var = DEFAULT_VALUES.form_var;
+    recent_var = DEFAULT_VALUES.recent_var;
+    speed_var = DEFAULT_VALUES.speed_var;
+    course_var = DEFAULT_VALUES.course_var;
+    going_var = DEFAULT_VALUES.going_var;
+    distance_var = DEFAULT_VALUES.distance_var;
+
+    // Update all input fields and displays
+    document.getElementById("stableVarInput").value = stable_var;
+    document.getElementById("trainerVarInput").value = trainer_var;
+    document.getElementById("formVarInput").value = form_var;
+    document.getElementById("recentVarInput").value = recent_var;
+    document.getElementById("speedVarInput").value = speed_var;
+    document.getElementById("courseVarInput").value = course_var;
+    document.getElementById("goingVarInput").value = going_var;
+    document.getElementById("distanceVarInput").value = distance_var;
+
+    document.getElementById("stableVarDisplay").textContent = stable_var;
+    document.getElementById("trainerVarDisplay").textContent = trainer_var;
+    document.getElementById("formVarDisplay").textContent = form_var;
+    document.getElementById("recentVarDisplay").textContent = recent_var;
+    document.getElementById("speedVarDisplay").textContent = speed_var;
+    document.getElementById("courseVarDisplay").textContent = course_var;
+    document.getElementById("goingVarDisplay").textContent = going_var;
+    document.getElementById("distanceVarDisplay").textContent = distance_var;
+
+    runAnalysis();
+}
+
+/* Toggle notes */
+function toggleNotes(id, el) {
+    let row = document.getElementById(id);
+
+    if (row.style.display === "none") {
+        row.style.display = "table-row";
+        if (el) el.textContent = "(Hide notes)";
+    } else {
+        row.style.display = "none";
+        if (el) el.textContent = "(Show notes)";
+    }
+}
+
+function expandAllNotes() {
+    document.querySelectorAll(".extra-info").forEach(r => {
+        r.style.display = "table-row";
+    });
+    document.querySelectorAll(".toggle-notes").forEach(el => {
+        el.textContent = "(Hide notes)";
+    });
+}
+
+function collapseAllNotes() {
+    document.querySelectorAll(".extra-info").forEach(r => {
+        r.style.display = "none";
+    });
+    document.querySelectorAll(".toggle-notes").forEach(el => {
+        el.textContent = "(Show notes)";
+    });
+}
+
+function parseStats(str) {
+    if (!str || str.trim() === "") return 0;
+    try {
+        // Handle both JSON format and simple numbers
+        if (str.startsWith("[") || str.startsWith("{")) {
+            let obj = JSON.parse(str.replace(/'/g,'"'));
+            return Number(obj.wins || 0);
+        }
+        return parseFloat(str) || 0;
+    } catch { 
+        return 0; 
+    }
+}
+
+function runAnalysis() {
+    let file = document.getElementById("fileInput").files[0];
+    if (!file) return;
+
+    Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        dynamicTyping: false,
+        complete: res => processData(res.data)
+    });
+}
+
+function processData(data) {
+    
+    groupedResults = {};
+    rawData = data;
+
+    data.forEach(row => {
+        
+        // Skip empty rows or rows with no identifying information
+        if (!row.horse_name || row.horse_name.trim() === "") {
+            return;
+        }
+
+        // Create race identifier
+        let raceID = row.course + "_" + row.off_time + "_" + row.distance;
+        
+        // Parse numeric values safely
+        let trainerOvrWinsPct = parseFloat((row.stats_trainer_ovr_wins_pct || "0").replace("%","").replace("-","0")) || 0;
+        let trainerRtf = parseFloat(row.trainer_rtf || 0) || 0;
+        let trainer14DaysWins = parseFloat(row.trainer_14_days_wins || 0) || 0;
+        let rpr = parseFloat(row.rpr || 0) || 0;
+        let lbs = parseFloat(row.lbs || 0) || 0;
+        let lastRun = parseFloat(row.last_run || 1) || 1;
+        let ts = parseFloat(row.ts || 0) || 0;
+        let ofr = parseFloat(row.ofr || 0) || 0;
+
+        let total = (
+            stable_var +
+            (trainerOvrWinsPct * trainer_var) +
+            trainerRtf +
+            trainer14DaysWins +
+            Math.max(((rpr - lbs) + rpr) * form_var, 1) +
+            Math.max(recent_var / lastRun, 1) +
+            Math.max(((ts - ofr) + ts) * speed_var, 1) +
+            (parseStats(row.stats_horse_course) * course_var) +
+            (parseStats(row.stats_horse_going) * going_var) +
+            (parseStats(row.stats_horse_distance) * distance_var)
+        ) / 100;
+
+        let exp = sliderToExp(document.getElementById("expSlider").value);
+        let score = Math.pow(Math.max(total, 0.1), exp);
+
+        row.Total = Math.round(total * 1000) / 25;
+        row.Score = Math.round(score * 10) / 10;
+
+        if (!groupedResults[raceID]) groupedResults[raceID] = [];
+        groupedResults[raceID].push(row);
+    });
+
+    displayResults();
+}
+
+function displayResults() {
+
+    let output = "";
+
+    Object.keys(groupedResults).forEach(raceID => {
+        let race = groupedResults[raceID];
+
+        let sumScore = race.reduce((a,b) => a + b.Score, 0);
+        race.sort((a,b) => b.Score - a.Score);
+
+        let raceTitle = (race[0].course || "Unknown") + 
+                        " - " + (race[0].off_time || "") + 
+                        " - " + (race[0].race_name || "") + 
+                        " - " + (race[0].distance || "");
+
+        output += `<div class="race-block">
+        <div class="race-title">${raceTitle}</div>
+        <table>
+        <tr>
+        <th>Name</th><th>Trainer</th><th>Jockey</th><th>Total</th><th>Rank</th><th>%</th><th>Price</th><th>Probability</th>
+        </tr>`;
+
+        race.forEach((row, i) => {
+
+            let pct = sumScore > 0 ? Math.round((row.Score/sumScore)*1000)/10 : 0;
+            let price = getPriceFromPercentage(pct);
+            let notesId = `notes_${raceID}_${i}`;
+
+            let extra = [];
+
+            if (row.comment && row.comment.trim()) extra.push(`<b>Comment:</b> ${row.comment}`);
+            if (row.spotlight && row.spotlight.trim()) extra.push(`<b>Spotlight:</b> ${row.spotlight}`);
+            if (row.quotes && row.quotes.trim()) extra.push(`<b>Quotes:</b> ${row.quotes}`);
+
+            let hasNotes = extra.length > 0;
+
+            output += `<tr>
+            <td>
+                ${row.horse_name || "N/A"}
+                ${hasNotes ? `<span class="toggle-notes" onclick="toggleNotes('${notesId}', this)">(Show notes)</span>` : ""}
+            </td>
+            <td>${row.trainer || "N/A"}</td>
+            <td>${row.jockey || "N/A"}</td>
+            <td>${row.Total || 0}</td>
+            <td>${i+1}</td>
+            <td>${pct}%</td>
+            <td><strong>${price}</strong></td>
+            
+            <td>
+                <div class="bar-container">
+                    <div class="bar" style="width:${pct}%"></div>
+                </div>
+            </td>
+            </tr>`;
+
+            if (hasNotes) {
+                output += `<tr id="${notesId}" class="extra-info">
+                    <td colspan="8">${extra.join("<br>")}</td>
+                </tr>`;
+            }
+        });
+
+        output += "</table></div>";
+    });
+
+    document.getElementById("results").innerHTML = output || "<p>No data to display. Please load a CSV file.</p>";
+}
+
+function downloadCSV() {
+    let csv = "course,off_time,race_name,distance,horse_name,trainer,jockey,Score,Rank,%,Price,Comment,Spotlight,Quotes\n";
+
+    Object.keys(groupedResults).forEach(raceID => {
+        let race = groupedResults[raceID];
+        let sumScore = race.reduce((a,b) => a + b.Score, 0);
+
+        race.forEach((row, i) => {
+            let pct = sumScore > 0 ? Math.round((row.Score/sumScore)*1000)/10 : 0;
+            let price = getPriceFromPercentage(pct);
+            
+            // Escape CSV values to handle commas and quotes
+            let escapedComment = (row.comment || "").replace(/"/g, '""');
+            let escapedSpotlight = (row.spotlight || "").replace(/"/g, '""');
+            let escapedQuotes = (row.quotes || "").replace(/"/g, '""');
+            
+            csv += `${row.course || ""},${row.off_time || ""},${row.race_name || ""},${row.distance || ""},${row.horse_name || ""},${row.trainer || ""},${row.jockey || ""},${row.Total || 0},${i+1},${pct},${price},"${escapedComment}","${escapedSpotlight}","${escapedQuotes}"\n`;
+        });
+    });
+
+    let blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    let link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "predictions.csv";
+    link.click();
+}
+
+</script>
+
+</body>
+</html>
