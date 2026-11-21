@@ -1,6 +1,5 @@
 
 <a href = "https://tastethewhip.github.io/2026.html">2026 Full (so far) </a><br><br>
-
 <a href = "https://tastethewhip.github.io/2025.html">2025 Full </a><br><br>
 <a href = "https://tastethewhip.github.io/2024_part_i.html">2024 January - April </a><br>
 <a href = "https://tastethewhip.github.io/2024_part_ii.html">2024 May - July  </a><br>
