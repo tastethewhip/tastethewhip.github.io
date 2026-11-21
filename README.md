@@ -1,14 +1,8 @@
 
 <a href = "https://tastethewhip.github.io/2026.html">2026 Full (so far) </a><br><br>
 <a href = "https://tastethewhip.github.io/2025.html">2025 Full </a><br><br>
-<a href = "https://tastethewhip.github.io/2024_part_i.html">2024 January - April </a><br>
-<a href = "https://tastethewhip.github.io/2024_part_ii.html">2024 May - July  </a><br>
-<a href = "https://tastethewhip.github.io/2024_part_iii.html">2024 Aug - Oct  </a><br>
-<a href = "https://tastethewhip.github.io/2024_part_iv.html">2024 Nov - Dec  </a><br><br>
-<a href = "https://tastethewhip.github.io/2023_part_i.html">2023 January - April</a><br>
-<a href = "https://tastethewhip.github.io/2023_part_ii.html">2023 May - July</a><br>
-<a href = "https://tastethewhip.github.io/2023_part_iii.html">2023 August - October</a><br>
-<a href = "https://tastethewhip.github.io/2023_part_iv.html">2023 November - December</a><br><br>
+<a href = "https://tastethewhip.github.io/2024.html">2024 Full</a><br><br>
+<a href = "https://tastethewhip.github.io/2023.html">2023 Full</a><br><br>
 <a href = "https://tastethewhip.github.io/2022_part_i.html">2022 January - April</a><br>
 <a href = "https://tastethewhip.github.io/2022_part_ii.html">2022 May - July</a><br>
 <a href = "https://tastethewhip.github.io/2022_part_iii.html">2022 August - October</a><br>
