@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Taste The Whip</title>
+  <meta name="description" content="Free tools for scraping and analysing UK and Irish horse racing data, including the Sporting Life Results Scraper.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Horse racing data tools</p>
+      <h1>Taste The Whip</h1>
+      <p class="lede">Free, open-source scrapers for UK &amp; Irish racing results and racecards, with a desktop app to browse and export everything to CSV or SQLite.</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="project" aria-labelledby="sl-title">
+      <div class="project-head">
+        <h2 id="sl-title">Sporting Life Results Scraper</h2>
+        <span class="badge" id="version">v1.0.1</span>
+      </div>
+      <p>Scrapes UK/IRE (and international) horse racing results from sportinglife.com, with history going back to about 2004–05. It also pulls racecards for today, tomorrow and up to six days ahead.</p>
+
+      <div class="actions">
+        <a class="btn primary" id="release-link" href="https://github.com/tastethewhip/Sporting-Life-Results-Scraper/releases/latest">Download the package</a>
+        <a class="btn" href="https://github.com/tastethewhip/Sporting-Life-Results-Scraper">View the repo on GitHub</a>
+      </div>
+
+      <h3>What it does</h3>
+      <ul class="features">
+        <li><strong>Results</strong> for any date range, one row per runner or per race.</li>
+        <li><strong>Racecards</strong> with draw, form, OR, jockey, trainer, odds, Timeform stars, Spotlight verdicts and last three runs.</li>
+        <li><strong>Breeding</strong>: sire, dam and damsire from each horse's profile, cached for good.</li>
+        <li><strong>Flexible CSV export</strong>: pick, reorder and rename columns; add blank columns to line up with other sheets.</li>
+        <li><strong>Racing Post layout</strong>: one click matches the rpscrape column order so the two sources can be joined.</li>
+        <li><strong>Built-in viewers</strong> for very large CSVs and SQLite databases, plus CSV joining and CSV → SQLite.</li>
+        <li><strong>Polite by default</strong>: requests are spaced at least 0.5 s apart and raw data is cached, so rescrapes are quick.</li>
+      </ul>
+
+      <h3>Quick start</h3>
+      <p>Needs Python with Tk (<code>sudo apt install python3-tk</code> on Ubuntu/Debian). Put the release files in one folder (or clone the repo), then:</p>
+<pre><code>python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+# desktop app
+python gui.py
+
+# results and racecards from the command line
+python sl_results.py --from 2026-10-01 --to 2026-10-07 --uk-ire
+python sl_racecards.py --tomorrow --uk-ire</code></pre>
+      <p class="note">Full setup notes, including pyenv, are in the <a href="https://github.com/tastethewhip/Sporting-Life-Results-Scraper#readme">README</a>. Released under the GPL-3.0 licence.</p>
+    </section>
+    <section class="project" aria-labelledby="archive-title">
+      <h2 id="archive-title">Results archive</h2>
+      <p>Racing results from 1988 to 2026 as searchable, sortable HTML tables, one file per year. Files are large (up to about 85&nbsp;MB), so give them a moment to load.</p>
+      <div class="archive">
+        <a href="2026.html">2026</a>
+        <a href="2025.html">2025</a>
+        <a href="2024.html">2024</a>
+        <a href="2023.html">2023</a>
+        <a href="2022.html">2022</a>
+        <a href="2021.html">2021</a>
+        <a href="2020.html">2020</a>
+        <a href="2019.html">2019</a>
+        <a href="2018.html">2018</a>
+        <a href="2017.html">2017</a>
+        <a href="2016.html">2016</a>
+        <a href="2015.html">2015</a>
+        <a href="2014.html">2014</a>
+        <a href="2013.html">2013</a>
+        <a href="2012.html">2012</a>
+        <a href="2011.html">2011</a>
+        <a href="2010.html">2010</a>
+        <a href="2009.html">2009</a>
+        <a href="2008.html">2008</a>
+        <a href="2007.html">2007</a>
+        <a href="2006.html">2006</a>
+        <a href="2005.html">2005</a>
+        <a href="2004.html">2004</a>
+        <a href="2003.html">2003</a>
+        <a href="2002.html">2002</a>
+        <a href="2001.html">2001</a>
+        <a href="2000.html">2000</a>
+        <a href="1999.html">1999</a>
+        <a href="1998.html">1998</a>
+        <a href="1997.html">1997</a>
+        <a href="1996.html">1996</a>
+        <a href="1995.html">1995</a>
+        <a href="1994.html">1994</a>
+        <a href="1993.html">1993</a>
+        <a href="1992.html">1992</a>
+        <a href="1991.html">1991</a>
+        <a href="1990.html">1990</a>
+        <a href="1989.html">1989</a>
+        <a href="1988.html">1988</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    <p>More projects on <a href="https://github.com/tastethewhip">GitHub</a> · Hosted on GitHub Pages</p>
+  </footer>
+
+  <script>
+    // Show the newest release number; the static text above is the fallback.
+    fetch("https://api.github.com/repos/tastethewhip/Sporting-Life-Results-Scraper/releases/latest")
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (rel) {
+        if (rel && rel.tag_name) {
+          document.getElementById("version").textContent = rel.tag_name;
+          document.getElementById("release-link").textContent = "Download the package (" + rel.tag_name + ")";
+        }
+      })
+      .catch(function () {});
+  </script>
+</body>
+</html>
